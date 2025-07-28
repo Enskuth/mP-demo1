@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>สถานะคุณภาพอากาศ</title>
+  <!-- ฟอนต์สวย อ่านง่าย รองรับหลายภาษา -->
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color1: #4fc3f7;
+      --color2: #66bb6a;
+      --color3: #fdd835;
+      --color4: #fb8c00;
+      --color5: #d32f2f;
+    }
+
+    body {
+      font-family: 'IBM Plex Sans Thai', 'Noto Sans SC', sans-serif;
+      margin: 0;
+      background: linear-gradient(270deg, var(--color1), var(--color2), var(--color3), var(--color4), var(--color5), var(--color1));
+      background-size: 1000% 1000%;
+      animation: gradientFlow 30s ease infinite;
+      color: white;
+    }
+
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    header {
+      position: relative;
+      text-align: center;
+      padding: 30px 20px 20px;
+      font-size: 32px;
+      font-weight: bold;
+      text-shadow: 1px 1px 3px #000;
+    }
+
+    .lang-switcher {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+    }
+
+    .lang-switcher button {
+      margin-left: 5px;
+      padding: 8px 16px;
+      border: none;
+      background-color: #ffffffcc;
+      color: #333;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+      transition: background 0.3s;
+    }
+
+    .lang-switcher button:hover {
+      background-color: #f1f1f1;
+    }
+
+    .content {
+      text-align: center;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .circle-aqi {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background-color: #66bb6a; /* สีเขียว */
+      margin: 0 auto 20px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: background-color 0.3s;
+    }
+
+    .circle-aqi .value,
+    .aqi-message {
+      color: white !important;
+    }
+
+    .circle-aqi .value {
+      font-size: 48px;
+      font-weight: bold;
+    }
+
+    .aqi-message {
+      font-size: 22px;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    .pm25-levels {
+      max-width: 700px;
+      margin: 40px auto 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .pm25-bar {
+      padding: 16px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      color: white !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .level1 { background-color: #4fc3f7; }
+    .level2 { background-color: #66bb6a; }
+    .level3 { background-color: #fdd835; }
+    .level4 { background-color: #fb8c00; }
+    .level5 { background-color: #d32f2f; }
+  </style>
+</head>
+<body>
+
+<header id="main-title">
+  ระดับคุณภาพอากาศ PM2.5
+  <div class="lang-switcher">
+    <button onclick="setLanguage('th')">ไทย</button>
+    <button onclick="setLanguage('en')">English</button>
+    <button onclick="setLanguage('zh')">中文</button>
+  </div>
+</header>
+
+<div class="content">
+  <div class="circle-aqi" id="circle-aqi">
+    <div class="value" id="current-aqi">43</div>
+  </div>
+
+  <div class="aqi-message" id="aqi-message">
+    คุณภาพอากาศดี
+  </div>
+
+  <div class="pm25-levels" id="levels">
+    <!-- รายการระดับจะแสดงผ่าน JavaScript -->
+  </div>
+</div>
+
+<script>
+  const currentValue = 43;
+
+  const data = {
+    th: {
+      title: "ระดับคุณภาพอากาศ PM2.5",
+      levels: [
+        "0 - 25: คุณภาพอากาศดีมาก — เหมาะสำหรับกิจกรรมกลางแจ้ง",
+        "26 - 50: คุณภาพอากาศดี — ทำกิจกรรมกลางแจ้งได้ตามปกติ",
+        "51 - 100: ปานกลาง — กลุ่มเสี่ยงควรระวังหากมีอาการผิดปกติ",
+        "101 - 200: เริ่มมีผลต่อสุขภาพ — ควรลดกิจกรรมนอกบ้าน",
+        "201 ขึ้นไป: มีผลกระทบต่อสุขภาพ — หลีกเลี่ยงกิจกรรมกลางแจ้งและสวมหน้ากาก"
+      ],
+      message: [
+        { max: 25, msg: "คุณภาพอากาศดีมาก" },
+        { max: 50, msg: "คุณภาพอากาศดี" },
+        { max: 100, msg: "ปานกลาง — กลุ่มเสี่ยงควรระวังหากมีอาการผิดปกติ" },
+        { max: 200, msg: "เริ่มมีผลต่อสุขภาพ — ควรลดกิจกรรมนอกบ้าน" },
+        { max: Infinity, msg: "มีผลกระทบต่อสุขภาพ — หลีกเลี่ยงกิจกรรมกลางแจ้งและสวมหน้ากาก" }
+      ]
+    },
+    en: {
+      title: "PM2.5 Air Quality Level",
+      levels: [
+        "0 - 25: Very good — Great for outdoor activities",
+        "26 - 50: Good — Safe for most outdoor activities",
+        "51 - 100: Moderate — Sensitive groups should take caution",
+        "101 - 200: Unhealthy — Limit outdoor exposure",
+        "201+: Hazardous — Avoid outdoor activities and wear a mask"
+      ],
+      message: [
+        { max: 25, msg: "Very good" },
+        { max: 50, msg: "Good" },
+        { max: 100, msg: "Moderate — Sensitive groups take caution" },
+        { max: 200, msg: "Unhealthy — Limit outdoor exposure" },
+        { max: Infinity, msg: "Hazardous — Avoid outdoor activities and wear a mask" }
+      ]
+    },
+    zh: {
+      title: "PM2.5 空气质量等级",
+      levels: [
+        "0 - 25: 空气非常好 — 适合户外活动",
+        "26 - 50: 空气良好 — 可正常活动",
+        "51 - 100: 中等 — 敏感人群应注意",
+        "101 - 200: 不健康 — 减少户外活动",
+        "201以上: 危险 — 避免外出并佩戴口罩"
+      ],
+      message: [
+        { max: 25, msg: "空气非常好" },
+        { max: 50, msg: "空气良好" },
+        { max: 100, msg: "中等 — 敏感人群应注意" },
+        { max: 200, msg: "不健康 — 减少户外活动" },
+        { max: Infinity, msg: "危险 — 避免外出并佩戴口罩" }
+      ]
+    }
+  };
+
+  function setLanguage(lang) {
+    const content = data[lang];
+
+    document.getElementById('main-title').childNodes[0].nodeValue = content.title;
+
+    const message = content.message.find(item => currentValue <= item.max);
+    document.getElementById('aqi-message').innerText = message.msg;
+
+    const levelsContainer = document.getElementById('levels');
+    levelsContainer.innerHTML = '';
+    content.levels.forEach((text, i) => {
+      const div = document.createElement('div');
+      div.className = `pm25-bar level${i + 1}`;
+      div.innerText = text;
+      levelsContainer.appendChild(div);
+    });
+  }
+
+  document.getElementById('current-aqi').innerText = currentValue;
+  setLanguage('th');
+</script>
+
+</body>
+</html>
