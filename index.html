@@ -68,8 +68,8 @@
     }
 
     .circle-aqi {
-      width: 160px;
-      height: 160px;
+      width: 180px;
+      height: 180px;
       border-radius: 50%;
       background-color: #66bb6a;
       margin: 0 auto 20px;
@@ -87,8 +87,13 @@
     }
 
     .circle-aqi .value {
-      font-size: 48px;
+      font-size: 38px;
       font-weight: bold;
+    }
+
+    .circle-aqi .unit {
+      font-size: 16px;
+      margin-top: 4px;
     }
 
     .aqi-message {
@@ -134,15 +139,14 @@
 <div class="content">
   <div class="circle-aqi" id="circle-aqi">
     <div class="value" id="current-aqi">43</div>
+    <div class="unit" id="aqi-unit">µg/m³</div>
   </div>
 
   <div class="aqi-message" id="aqi-message">
     คุณภาพอากาศดี
   </div>
 
-  <div class="pm25-levels" id="levels">
-    <!-- รายการระดับจะแสดงผ่าน JavaScript -->
-  </div>
+  <div class="pm25-levels" id="levels"></div>
 </div>
 
 <script>
@@ -152,6 +156,7 @@
   const data = {
     th: {
       title: " AirNova",
+      unit: "µg/m³",
       levels: [
         "0 - 25: คุณภาพอากาศดีมาก — เหมาะสำหรับกิจกรรมกลางแจ้ง",
         "26 - 50: คุณภาพอากาศดี — ทำกิจกรรมกลางแจ้งได้ตามปกติ",
@@ -169,6 +174,7 @@
     },
     en: {
       title: " AirNova",
+      unit: "µg/m³",
       levels: [
         "0 - 25: Very good — Great for outdoor activities",
         "26 - 50: Good — Safe for most outdoor activities",
@@ -186,6 +192,7 @@
     },
     zh: {
       title: " AirNova",
+      unit: "µg/m³",
       levels: [
         "0 - 25: 空气非常好 — 适合户外活动",
         "26 - 50: 空气良好 — 可正常活动",
@@ -207,6 +214,7 @@
     currentLang = lang;
     const content = data[lang];
     document.getElementById('main-title').childNodes[0].nodeValue = content.title;
+    document.getElementById('aqi-unit').innerText = content.unit;
 
     const message = content.message.find(item => currentValue <= item.max);
     document.getElementById('aqi-message').innerText = message.msg;
@@ -228,6 +236,7 @@
     document.getElementById('current-aqi').innerText = currentValue;
 
     const content = data[currentLang];
+    document.getElementById('aqi-unit').innerText = content.unit;
     const message = content.message.find(item => currentValue <= item.max);
     document.getElementById('aqi-message').innerText = message.msg;
   }
