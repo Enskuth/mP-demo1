@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>AirNova</title>
-  <!-- ฟอนต์สวย อ่านง่าย รองรับหลายภาษา -->
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;600&display=swap" rel="stylesheet">
   <style>
@@ -72,7 +71,7 @@
       width: 160px;
       height: 160px;
       border-radius: 50%;
-      background-color: #66bb6a; /* สีเขียว */
+      background-color: #66bb6a;
       margin: 0 auto 20px;
       box-shadow: 0 4px 16px rgba(0,0,0,0.3);
       display: flex;
@@ -147,7 +146,8 @@
 </div>
 
 <script>
-  const currentValue = 43;
+  let currentValue = 43;
+  let currentLang = 'th';
 
   const data = {
     th: {
@@ -204,8 +204,8 @@
   };
 
   function setLanguage(lang) {
+    currentLang = lang;
     const content = data[lang];
-
     document.getElementById('main-title').childNodes[0].nodeValue = content.title;
 
     const message = content.message.find(item => currentValue <= item.max);
@@ -221,8 +221,19 @@
     });
   }
 
-  document.getElementById('current-aqi').innerText = currentValue;
+  function updateFakeAQI() {
+    const min = 35;
+    const max = 44;
+    currentValue = Math.floor(Math.random() * (max - min + 1)) + min;
+    document.getElementById('current-aqi').innerText = currentValue;
+
+    const content = data[currentLang];
+    const message = content.message.find(item => currentValue <= item.max);
+    document.getElementById('aqi-message').innerText = message.msg;
+  }
+
   setLanguage('th');
+  setInterval(updateFakeAQI, 2000);
 </script>
 
 </body>
